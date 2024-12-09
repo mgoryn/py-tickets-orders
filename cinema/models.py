@@ -85,23 +85,42 @@ class Ticket(models.Model):
     seat = models.IntegerField()
 
     @staticmethod
-    def validate_position(value: int, max_value: int, field_name: str, error_to_raise):
+    def validate_position(
+            value: int,
+            max_value: int,
+            field_name: str,
+            error_to_raise
+    ):
         if not (1 <= value <= max_value):
             raise error_to_raise({
-                field_name: f"{field_name} must be in the range [1, {max_value}]"
+                field_name:
+                    f"{field_name} must be in the range "
+                    f"[1, {max_value}]"
             })
 
     def clean(self):
         cinema_hall = self.movie_session.cinema_hall
-        Ticket.validate_position(self.row, cinema_hall.rows, "row", ValidationError)
-        Ticket.validate_position(self.seat, cinema_hall.seats_in_row, "seat", ValidationError)
+        Ticket.validate_position(
+            self.row,
+            cinema_hall.rows,
+            "row",
+            ValidationError
+        )
+        Ticket.validate_position(
+            self.seat,
+            cinema_hall.seats_in_row,
+            "seat",
+            ValidationError
+        )
 
     def save(self, *args, **kwargs):
         self.full_clean()
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.movie_session} (row: {self.row}, seat: {self.seat})"
+        return (f"{self.movie_session} "
+                f"(row: {self.row},"
+                f" seat: {self.seat})")
 
     class Meta:
         unique_together = ("movie_session", "row", "seat")
